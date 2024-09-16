@@ -1,0 +1,36 @@
+spring:
+    datasource:
+        url: ${SPRING_STOCK_DATASOURCE_URL:jdbc:mysql://localhost:3307/car}
+        username: ${SPRING_STOCK_DATASOURCE_USERNAME:root}
+        password: ${SPRING_STOCK_DATASOURCE_PASSWORD:password}
+        driver-class-name: com.mysql.cj.jdbc.Driver
+
+    jpa:
+        hibernate:
+            ddl-auto: update
+        show-sql: true
+
+    mvc:
+        log-request-details: true
+
+logging:
+    level:
+        web: trace
+        org:
+            springframework:
+                web: trace
+
+server:
+    port: 8093
+
+allowed-origins:
+    http://localhost:3000/,
+    *,
+
+emazon:
+    stock:
+        base-url: localhost:8091
+    user:
+        base-url: localhost:8090
+    transaction:
+        base-url: localhost:8092

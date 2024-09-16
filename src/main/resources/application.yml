@@ -1,0 +1,9 @@
+spring:
+    application:
+        name: car
+    profiles:
+        active: local
+
+app:
+    description: "Emazon's Car Microservice API"
+    version: "0.0.1"
