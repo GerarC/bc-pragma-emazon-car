@@ -1,5 +1,6 @@
 package com.emazon.car.configuration.security.filter;
 
+import com.emazon.car.domain.utils.TokenContainer;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,6 +41,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        TokenContainer.setToken(authorizationHeader);
         filterChain.doFilter(request, response);
     }
 }

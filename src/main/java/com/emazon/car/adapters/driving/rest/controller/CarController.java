@@ -17,7 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/car")
+@RequestMapping("/cars/")
 @RequiredArgsConstructor
 public class CarController {
     private final CarService carService;
@@ -37,7 +37,7 @@ public class CarController {
                     description = RestConstants.SWAGGER_USER_NOT_FOUND,
                     content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
     })
-    @PostMapping("/{user-id}/items")
+    @PostMapping("/{user-id}/items") // I use this way because I like to separate items by user
     @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<CarResponse> addItem(
             @PathVariable("user-id") String userId,

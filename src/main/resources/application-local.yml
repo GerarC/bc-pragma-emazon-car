@@ -1,17 +1,18 @@
 spring:
     datasource:
-        url: ${SPRING_STOCK_DATASOURCE_URL:jdbc:mysql://localhost:3307/car}
+        url: ${SPRING_STOCK_DATASOURCE_URL:jdbc:mysql://localhost:3309/car}
         username: ${SPRING_STOCK_DATASOURCE_USERNAME:root}
         password: ${SPRING_STOCK_DATASOURCE_PASSWORD:password}
-        driver-class-name: com.mysql.cj.jdbc.Driver
 
     jpa:
         hibernate:
-            ddl-auto: update
+            ddl-auto: create
         show-sql: true
 
     mvc:
         log-request-details: true
+
+
 
 logging:
     level:

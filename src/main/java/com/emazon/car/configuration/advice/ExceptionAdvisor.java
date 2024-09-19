@@ -2,7 +2,10 @@ package com.emazon.car.configuration.advice;
 
 import com.emazon.car.configuration.advice.responses.ExceptionResponse;
 import com.emazon.car.configuration.advice.responses.ValidationExceptionResponse;
-import jakarta.persistence.EntityNotFoundException;
+import com.emazon.car.domain.exceptions.EntityNotFoundException;
+import com.emazon.car.domain.exceptions.ItemAlreadyAddedException;
+import com.emazon.car.domain.exceptions.MaxCategoryCountException;
+import com.emazon.car.domain.exceptions.NotEnoughProductStockException;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +27,6 @@ public class ExceptionAdvisor {
                 .message(message).build();
     }
 
-    @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ExceptionResponse> handleGeneralException(RuntimeException e) {
         ExceptionResponse exceptionResponse = exceptionResponseBuilder(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         return ResponseEntity.status(exceptionResponse.getStatusCode()).body(exceptionResponse);
@@ -45,6 +47,24 @@ public class ExceptionAdvisor {
     @ExceptionHandler(PropertyReferenceException.class)
     public ResponseEntity<ExceptionResponse> handlePropertyReferenceException(PropertyReferenceException e) {
         ExceptionResponse exceptionResponse = exceptionResponseBuilder(e.getMessage(), HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(exceptionResponse.getStatusCode()).body(exceptionResponse);
+    }
+
+    @ExceptionHandler(ItemAlreadyAddedException.class)
+    public ResponseEntity<ExceptionResponse> handleItemAlreadyAddedException(ItemAlreadyAddedException e) {
+        ExceptionResponse exceptionResponse = exceptionResponseBuilder(e.getMessage(), HttpStatus.CONFLICT);
+        return ResponseEntity.status(exceptionResponse.getStatusCode()).body(exceptionResponse);
+    }
+
+    @ExceptionHandler(MaxCategoryCountException.class)
+    public ResponseEntity<ExceptionResponse> handleMaxCategoryCountException(MaxCategoryCountException e) {
+        ExceptionResponse exceptionResponse = exceptionResponseBuilder(e.getMessage(), HttpStatus.CONFLICT);
+        return ResponseEntity.status(exceptionResponse.getStatusCode()).body(exceptionResponse);
+    }
+
+    @ExceptionHandler(NotEnoughProductStockException.class)
+    public ResponseEntity<ExceptionResponse> handleNotEnoughProductStockException(NotEnoughProductStockException e) {
+        ExceptionResponse exceptionResponse = exceptionResponseBuilder(e.getMessage(), HttpStatus.CONFLICT);
         return ResponseEntity.status(exceptionResponse.getStatusCode()).body(exceptionResponse);
     }
 

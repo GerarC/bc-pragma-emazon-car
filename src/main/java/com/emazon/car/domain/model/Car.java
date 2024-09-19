@@ -1,23 +1,26 @@
 package com.emazon.car.domain.model;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Car {
     private String id;
     private String userId;
-    private LocalDateTime modified;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private List<Item> items;
 
-    public Car(String id, String userId, LocalDateTime modified, List<Item> items) {
+    public Car(String id, String userId, LocalDateTime createdAt, LocalDateTime updatedAt, List<Item> items) {
         this.id = id;
         this.userId = userId;
-        this.modified = modified;
-        this.items = items;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.items = items == null ? new ArrayList<>() : items;
     }
 
     public Car() {
+        this.items = new ArrayList<>();
     }
 
     public String getId() {
@@ -36,20 +39,28 @@ public class Car {
         this.userId = userId;
     }
 
-    public LocalDateTime getModified() {
-        return modified;
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setModified(LocalDateTime modified) {
-        this.modified = modified;
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public List<Item> getItems() {
-        return Collections.unmodifiableList(items);
+        return this.items;
     }
 
     public void setItems(List<Item> items) {
-        this.items = items;
+        this.items = items == null ? new ArrayList<>() : items;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public void addItem(Item item) {

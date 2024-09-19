@@ -2,6 +2,7 @@ package com.emazon.car.domain.api.usecase;
 
 import com.emazon.car.domain.api.CarServicePort;
 import com.emazon.car.domain.exceptions.EntityNotFoundException;
+import com.emazon.car.domain.exceptions.ItemAlreadyAddedException;
 import com.emazon.car.domain.exceptions.MaxCategoryCountException;
 import com.emazon.car.domain.exceptions.NotEnoughProductStockException;
 import com.emazon.car.domain.model.Car;
@@ -37,25 +38,34 @@ public class CarUserCase implements CarServicePort {
             throw new EntityNotFoundException(DomainConstants.USER_ENTITY_NAME, userId);
 
         Car car = getCarByUserIdOrCreate(userId);
-        Product product = productPersistencePort.getProduct(item.getId());
-        if (product.getQuantity() < item.getQuantity()) throw new NotEnoughProductStockException(product.getName());
+        Product product = productPersistencePort.getProduct(item.getProductId());
 
-        if (!car.getItems().isEmpty()) {
-            List<Item> items = car.getItems();
+        List<Item> items = car.getItems();
+        if (items != null && !items.isEmpty()) {
             List<Long> ids = items.stream().map(Item::getProductId).toList();
             List<Product> products = productPersistencePort.getProductsById(ids);
 
-            for (int idx = 0; idx < products.size(); idx++) {
-                if (products.get(idx).getQuantity() < items.get(idx).getQuantity()){
-                    itemPersistencePort.deleteById(items.get(idx).getProductId());
-                    throw new NotEnoughProductStockException(products.get(idx).getName());
+            for (int index = 0; index < products.size(); index++) {
+                if (products.get(index).getQuantity() < items.get(index).getQuantity()){
+                    throw new NotEnoughProductStockException(products.get(index).getName());
                 }
             }
             validateCanAddProduct(products, product);
         }
 
-        car.addItem(item);
-        return updateCar(car);
+        validateItem(item, car, product);
+        item.setCar(car);
+        car.addItem(
+                itemPersistencePort.save(item)
+        );
+        updateCar(car);
+        return car;
+    }
+
+    private void validateItem(Item item, Car car, Product product) {
+        if (product.getQuantity() < item.getQuantity()) throw new NotEnoughProductStockException(product.getName());
+        if(itemPersistencePort.existsByProductIdAndCarId(item.getProductId(), car.getId()))
+            throw new ItemAlreadyAddedException(car.getId());
     }
 
     private Car getCarByUserIdOrCreate(String userId) {
@@ -63,26 +73,26 @@ public class CarUserCase implements CarServicePort {
             return carPersistencePort.getCarByUserId(userId);
         } catch (EntityNotFoundException e) {
             return carPersistencePort.createCar(
-                    new Car(null, userId, LocalDateTime.now(), null)
+                    new Car(null, userId, LocalDateTime.now(), LocalDateTime.now(), List.of())
             );
         }
     }
 
-    void validateCanAddProduct(List<Product> carProducts, Product product) {
-        Map<Long, Integer> categoryCount = new HashMap<>();
+    private void validateCanAddProduct(List<Product> carProducts, Product product) {
+        Map<String, Integer> categoryCount = new HashMap<>();
         carProducts.forEach(item ->
                 item.getCategories().forEach(category ->
-                        categoryCount.merge(category.getId(), 1, Integer::sum)
+                        categoryCount.merge(category, 1, Integer::sum)
                 )
         );
         product.getCategories().forEach(category -> {
-            int count = categoryCount.getOrDefault(category.getId(), 0) + 1;
-            if (count > DomainConstants.MAX_CATEGORY_ITEMS) throw new MaxCategoryCountException(category.getName());
+            int count = categoryCount.getOrDefault(category, 0) + 1;
+            if (count > DomainConstants.MAX_CATEGORY_ITEMS) throw new MaxCategoryCountException(category);
         });
     }
 
-    private Car updateCar(Car car){
-        car.setModified(LocalDateTime.now());
-        return carPersistencePort.updateCar(car);
+    private void updateCar(Car car){
+        car.setUpdatedAt(LocalDateTime.now());
+        carPersistencePort.updateCar(car);
     }
 }
