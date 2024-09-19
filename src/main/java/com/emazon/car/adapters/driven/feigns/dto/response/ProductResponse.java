@@ -13,5 +13,8 @@ import java.util.List;
 public class ProductResponse {
     private Long id;
     private String name;
-    private List<CategoryResponse> categories;
+    private String description;
+    private String brand;
+    private Long quantity;
+    private List<String> categories;
 }

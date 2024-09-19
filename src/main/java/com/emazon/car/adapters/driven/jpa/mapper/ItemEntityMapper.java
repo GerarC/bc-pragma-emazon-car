@@ -13,13 +13,14 @@ import java.util.List;
 @Mapper(componentModel = "spring",
         unmappedSourcePolicy = ReportingPolicy.IGNORE,
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface CarEntityMapper {
+public interface ItemEntityMapper {
     @Mapping(target = "car", ignore = true)
-    Item toDomain(ItemEntity entity);
-    Car toDomain(CarEntity carEntity);
-    List<Car> toDomains(List<CarEntity> carEntityList);
+    Item toDomain(ItemEntity itemEntity);
+    List<Item> toDomains(List<ItemEntity> itemEntities);
 
     @Mapping(target = "items", ignore = true)
     CarEntity toEntity(Car car);
-    List<CarEntity> toEntities(List<Car> cars);
+
+    ItemEntity toEntity(Item item);
+    List<ItemEntity> toEntities(List<Item> items);
 }

@@ -1,13 +1,18 @@
 package com.emazon.car.adapters.driven.jpa.adapter;
 
 import com.emazon.car.adapters.driven.jpa.entity.CarEntity;
+import com.emazon.car.adapters.driven.jpa.entity.ItemEntity;
 import com.emazon.car.adapters.driven.jpa.mapper.CarEntityMapper;
+import com.emazon.car.adapters.driven.jpa.mapper.ItemEntityMapper;
 import com.emazon.car.adapters.driven.jpa.persistence.CarRepository;
+import com.emazon.car.adapters.driven.jpa.persistence.ItemRepository;
 import com.emazon.car.domain.exceptions.EntityNotFoundException;
 import com.emazon.car.domain.model.Car;
 import com.emazon.car.domain.spi.CarPersistencePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -15,6 +20,7 @@ public class CarJpaAdapter implements CarPersistencePort {
 
     private final CarRepository carRepository;
     private final CarEntityMapper carEntityMapper;
+    private final ItemRepository itemRepository;
 
     @Override
     public Car createCar(Car car) {
@@ -43,6 +49,8 @@ public class CarJpaAdapter implements CarPersistencePort {
     @Override
     public Car updateCar(Car car) {
         CarEntity entity = carEntityMapper.toEntity(car);
+        List<ItemEntity> itemEntities = itemRepository.findAllByCar_Id(car.getId());
+        entity.setItems(itemEntities);
         return carEntityMapper.toDomain(
                 carRepository.save(entity)
         );

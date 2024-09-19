@@ -5,6 +5,7 @@ public class TokenContainer {
         throw new UnsupportedOperationException("TokenContainer is a utility class and cannot be instantiated");
     }
 
+    // add id to token
     private static String token;
 
     public static String getToken() {

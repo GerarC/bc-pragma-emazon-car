@@ -4,11 +4,13 @@ public class Item {
     private Long id;
     private Long productId;
     private Integer quantity;
+    private Car car;
 
-    public Item(Long id, Long productId, Integer quantity) {
+    public Item(Long id, Long productId, Integer quantity, Car car) {
         this.id = id;
         this.productId = productId;
         this.quantity = quantity;
+        this.car = car;
     }
 
     public Item() {
@@ -36,5 +38,13 @@ public class Item {
 
     public void setProductId(Long productId) {
         this.productId = productId;
+    }
+
+    public Car getCar() {
+        return car;
+    }
+
+    public void setCar(Car car) {
+        this.car = car;
     }
 }

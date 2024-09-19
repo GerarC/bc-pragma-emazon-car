@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CarResponse {
     private String userId;
-    private LocalDateTime modified;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private List<ItemResponse> items;
 }

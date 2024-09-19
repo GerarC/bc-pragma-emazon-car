@@ -22,9 +22,12 @@ public class CarEntity {
     @Column(name = "user_id", nullable = false)
     private String userId;
 
-    @Column(name = "modified", nullable = false)
-    private LocalDateTime modified;
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "car", cascade = CascadeType.MERGE, orphanRemoval = true)
     private List<ItemEntity> items;
 }

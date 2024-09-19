@@ -5,12 +5,16 @@ import java.util.List;
 public class Product {
     private Long id;
     private String name;
+    private String description;
+    private String brand;
     private Integer quantity;
-    private List<Category> categories;
+    private List<String> categories;
 
-    public Product(Long id, String name, Integer quantity, List<Category> categories) {
+    public Product(Long id, String name, String description, String brand, Integer quantity, List<String> categories) {
         this.id = id;
         this.name = name;
+        this.description = description;
+        this.brand = brand;
         this.quantity = quantity;
         this.categories = categories;
     }
@@ -34,16 +38,32 @@ public class Product {
         this.name = name;
     }
 
-    public List<Category> getCategories() {
+    public List<String> getCategories() {
         return categories;
     }
 
-    public void setCategories(List<Category> categories) {
+    public void setCategories(List<String> categories) {
         this.categories = categories;
     }
 
     public Integer getQuantity() {
         return quantity;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
     }
 
     public void setQuantity(Integer quantity) {
