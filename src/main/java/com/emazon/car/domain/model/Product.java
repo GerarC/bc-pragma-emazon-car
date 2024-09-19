@@ -7,10 +7,10 @@ public class Product {
     private String name;
     private String description;
     private String brand;
-    private Integer quantity;
+    private Long quantity;
     private List<String> categories;
 
-    public Product(Long id, String name, String description, String brand, Integer quantity, List<String> categories) {
+    public Product(Long id, String name, String description, String brand, Long quantity, List<String> categories) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -46,7 +46,7 @@ public class Product {
         this.categories = categories;
     }
 
-    public Integer getQuantity() {
+    public Long getQuantity() {
         return quantity;
     }
 
@@ -66,7 +66,7 @@ public class Product {
         this.brand = brand;
     }
 
-    public void setQuantity(Integer quantity) {
+    public void setQuantity(Long quantity) {
         this.quantity = quantity;
     }
 }

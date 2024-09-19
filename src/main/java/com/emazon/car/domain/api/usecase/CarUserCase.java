@@ -78,7 +78,7 @@ public class CarUserCase implements CarServicePort {
         }
     }
 
-    void validateCanAddProduct(List<Product> carProducts, Product product) {
+    private void validateCanAddProduct(List<Product> carProducts, Product product) {
         Map<String, Integer> categoryCount = new HashMap<>();
         carProducts.forEach(item ->
                 item.getCategories().forEach(category ->

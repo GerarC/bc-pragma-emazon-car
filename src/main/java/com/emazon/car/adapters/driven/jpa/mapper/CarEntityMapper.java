@@ -15,7 +15,7 @@ import java.util.List;
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface CarEntityMapper {
     @Mapping(target = "car", ignore = true)
-    Item toDomain(ItemEntity entity);
+    Item toDomainItem(ItemEntity entity);
     Car toDomain(CarEntity carEntity);
     List<Car> toDomains(List<CarEntity> carEntityList);
 
