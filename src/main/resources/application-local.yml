@@ -1,8 +1,10 @@
 spring:
     datasource:
-        url: ${SPRING_STOCK_DATASOURCE_URL:jdbc:mysql://localhost:3309/car}
-        username: ${SPRING_STOCK_DATASOURCE_USERNAME:root}
-        password: ${SPRING_STOCK_DATASOURCE_PASSWORD:password}
+        url: ${SPRING_CART_DATASOURCE_URL:jdbc:mysql://localhost:3306/cart}
+        username: ${SPRING_CART_DATASOURCE_USERNAME:root}
+        password: ${SPRING_CART_DATASOURCE_PASSWORD:password}
+        hikari:
+            schema: ${SPRING_CART_DATASOURCE_SCHEME:cart}
 
     jpa:
         hibernate:
