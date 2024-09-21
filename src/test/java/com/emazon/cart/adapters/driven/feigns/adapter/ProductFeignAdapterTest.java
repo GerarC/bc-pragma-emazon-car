@@ -2,7 +2,7 @@ package com.emazon.cart.adapters.driven.feigns.adapter;
 
 import com.emazon.cart.adapters.driven.feigns.client.ProductFeign;
 import com.emazon.cart.adapters.driven.feigns.dto.response.ProductResponse;
-import com.emazon.cart.adapters.driven.feigns.mapper.ProductResponseMapper;
+import com.emazon.cart.adapters.driven.feigns.mapper.response.ProductResponseMapper;
 import com.emazon.cart.domain.exceptions.EntityNotFoundException;
 import com.emazon.cart.domain.model.Product;
 import feign.FeignException;

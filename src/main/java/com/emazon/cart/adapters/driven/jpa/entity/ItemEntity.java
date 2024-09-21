@@ -23,6 +23,6 @@ public class ItemEntity {
     private Integer quantity;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "car_id", referencedColumnName = "car_id")
-    private CartEntity car;
+    @JoinColumn(name = "cart_id", referencedColumnName = "cart_id")
+    private CartEntity cart;
 }

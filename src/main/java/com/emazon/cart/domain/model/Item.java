@@ -1,16 +1,24 @@
 package com.emazon.cart.domain.model;
 
+import java.util.List;
+
 public class Item {
     private Long id;
     private Long productId;
+    private String name;
     private Integer quantity;
     private Cart cart;
+    private List<String> categories;
+    private String brand;
 
-    public Item(Long id, Long productId, Integer quantity, Cart cart) {
+    public Item(Long id, Long productId, String name, Integer quantity, Cart cart, List<String> categories, String brand) {
         this.id = id;
         this.productId = productId;
+        this.name = name;
         this.quantity = quantity;
         this.cart = cart;
+        this.categories = categories;
+        this.brand = brand;
     }
 
     public Item() {
@@ -46,5 +54,29 @@ public class Item {
 
     public void setCart(Cart cart) {
         this.cart = cart;
+    }
+
+    public List<String> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<String> categories) {
+        this.categories = categories;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
     }
 }

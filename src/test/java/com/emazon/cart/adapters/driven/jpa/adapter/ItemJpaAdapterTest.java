@@ -50,7 +50,7 @@ class ItemJpaAdapterTest {
 
     @Test
     void existsByProductIdAndCarId() {
-        when(itemRepository.existsByProductIdAndCarId(1L, "carId")).thenReturn(true);
+        when(itemRepository.existsByProductIdAndCartId(1L, "carId")).thenReturn(true);
         assertTrue(itemJpaAdapter.existsByProductIdAndCarId(1L, "carId"));
     }
 
@@ -73,9 +73,9 @@ class ItemJpaAdapterTest {
         Item item = new Item(id, productId, 0, null);
         ItemEntity itemEntity = new ItemEntity(id, productId, 0, null);
         when(itemEntityMapper.toDomain(itemEntity)).thenReturn(item);
-        when(itemRepository.findByProductIdAndCarId(productId, carId)).thenReturn(Optional.of(itemEntity));
+        when(itemRepository.findByProductIdAndCartId(productId, carId)).thenReturn(Optional.of(itemEntity));
         Item returnedItem = itemJpaAdapter.findByProductIdAndCarId(productId, carId);
-        verify(itemRepository).findByProductIdAndCarId(productId, carId);
+        verify(itemRepository).findByProductIdAndCartId(productId, carId);
         verify(itemEntityMapper).toDomain(itemEntity);
         assertNotNull(returnedItem);
         assertEquals(returnedItem, item);

@@ -25,14 +25,14 @@ public class ItemJpaAdapter implements ItemPersistencePort {
 
     @Override
     public boolean existsByProductIdAndCarId(Long productId, String carId) {
-        return itemRepository.existsByProductIdAndCarId(productId, carId);
+        return itemRepository.existsByProductIdAndCartId(productId, carId);
     }
 
     @Override
     public Item findByProductIdAndCarId(Long productId, String carId) {
         return itemEntityMapper.toDomain(
                 itemRepository
-                        .findByProductIdAndCarId(productId, carId)
+                        .findByProductIdAndCartId(productId, carId)
                         .orElseThrow(() -> new EntityNotFoundException(
                                 String.format(DomainConstants.PRODUCT_IN_CART_NOT_FOUND, productId, carId)))
         );

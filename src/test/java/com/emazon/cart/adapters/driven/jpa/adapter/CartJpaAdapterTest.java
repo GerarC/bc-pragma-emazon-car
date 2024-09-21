@@ -107,7 +107,7 @@ class CartJpaAdapterTest {
         when(cartEntityMapper.toDomain(any())).thenReturn(cart);
         when(cartRepository.save(any())).thenReturn(cartEntity);
         when(cartEntityMapper.toEntity(any())).thenReturn(cartEntity);
-        when(itemRepository.findAllByCar_Id(any())).thenReturn(List.of());
+        when(itemRepository.findAllByCart_Id(any())).thenReturn(List.of());
         Cart cartUpdated = carJpaAdapter.updateCar(cart);
         verify(cartRepository).save(any());
         assertNotNull(cartUpdated);

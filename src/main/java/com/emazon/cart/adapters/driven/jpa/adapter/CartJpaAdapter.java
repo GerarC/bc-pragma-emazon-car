@@ -48,7 +48,7 @@ public class CartJpaAdapter implements CartPersistencePort {
     @Override
     public Cart updateCar(Cart cart) {
         CartEntity entity = cartEntityMapper.toEntity(cart);
-        List<ItemEntity> itemEntities = itemRepository.findAllByCar_Id(cart.getId());
+        List<ItemEntity> itemEntities = itemRepository.findAllByCart_Id(cart.getId());
         entity.setItems(itemEntities);
         return cartEntityMapper.toDomain(
                 cartRepository.save(entity)

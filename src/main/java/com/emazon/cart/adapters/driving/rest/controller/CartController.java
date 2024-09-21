@@ -1,7 +1,11 @@
 package com.emazon.cart.adapters.driving.rest.controller;
 
 import com.emazon.cart.adapters.driving.rest.dto.request.ItemRequest;
+import com.emazon.cart.adapters.driving.rest.dto.request.PageQuery;
+import com.emazon.cart.adapters.driving.rest.dto.request.filter.ItemFilterRequest;
 import com.emazon.cart.adapters.driving.rest.dto.response.CarResponse;
+import com.emazon.cart.adapters.driving.rest.dto.response.FullItemResponse;
+import com.emazon.cart.adapters.driving.rest.dto.response.PageResponse;
 import com.emazon.cart.adapters.driving.rest.service.CartService;
 import com.emazon.cart.adapters.driving.rest.utils.RestConstants;
 import com.emazon.cart.configuration.advice.responses.ExceptionResponse;
@@ -11,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -74,4 +79,14 @@ public class CartController {
         return ResponseEntity.ok(cartService.removeItem(userId, productId));
 
     }
+
+    @GetMapping("/{user-id}/items")
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
+    public ResponseEntity<PageResponse<FullItemResponse>> getCartItems(
+            @PathVariable("user-id") String userId,
+            @Nullable ItemFilterRequest filter,
+            @Nullable PageQuery query){
+        return ResponseEntity.ok(cartService.getItems(userId, filter, query));
+    }
+
 }

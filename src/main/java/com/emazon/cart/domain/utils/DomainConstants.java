@@ -14,4 +14,7 @@ public class DomainConstants {
     public static final String ITEM_ALREADY_ADDED_MESSAGE = "Item already added to the car '%s'";
     public static final String QUANTITY_MUST_BE_POSITIVE = "Quantity must be positive";
     public static final String PRODUCT_IN_CART_NOT_FOUND = "Product with id '%s' not found in cart with id '%s'";
+    public static final Integer DEFAULT_PAGE_SIZE = 10;
+    public static final Integer DEFAULT_PAGE_NUMBER = 0;
+
 }

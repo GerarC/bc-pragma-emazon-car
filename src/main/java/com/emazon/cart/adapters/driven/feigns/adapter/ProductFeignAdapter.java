@@ -1,13 +1,20 @@
 package com.emazon.cart.adapters.driven.feigns.adapter;
 
 import com.emazon.cart.adapters.driven.feigns.client.ProductFeign;
-import com.emazon.cart.adapters.driven.feigns.mapper.ProductResponseMapper;
+import com.emazon.cart.adapters.driven.feigns.dto.request.ProductQuery;
+import com.emazon.cart.adapters.driven.feigns.mapper.request.ProductQueryMapper;
+import com.emazon.cart.adapters.driven.feigns.mapper.response.ProductResponseMapper;
 import com.emazon.cart.domain.exceptions.EntityNotFoundException;
 import com.emazon.cart.domain.model.Product;
 import com.emazon.cart.domain.spi.ProductPersistencePort;
+import com.emazon.cart.domain.utils.filter.ItemFilter;
+import com.emazon.cart.domain.utils.pagination.DomainPage;
+import com.emazon.cart.domain.utils.pagination.PaginationData;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
@@ -16,6 +23,7 @@ import java.util.List;
 public class ProductFeignAdapter implements ProductPersistencePort {
     private final ProductFeign productFeign;
     private final ProductResponseMapper productResponseMapper;
+    private final ProductQueryMapper productQueryMapper;
 
     @Override
     public Product getProduct(Long id) {
@@ -37,5 +45,13 @@ public class ProductFeignAdapter implements ProductPersistencePort {
         }catch(FeignException.NotFound e) {
             throw new EntityNotFoundException(Product.class.getSimpleName(), ids.toString());
         }
+    }
+
+    @Override
+    public DomainPage<Product> getAllProducts(ItemFilter itemFilter, PaginationData data) {
+        ProductQuery query = productQueryMapper.toRequest(itemFilter, data);
+        return productResponseMapper.toDomainPage(
+                productFeign.getProducts(query)
+        );
     }
 }

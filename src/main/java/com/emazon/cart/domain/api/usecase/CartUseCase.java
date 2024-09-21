@@ -13,6 +13,9 @@ import com.emazon.cart.domain.spi.ItemPersistencePort;
 import com.emazon.cart.domain.spi.ProductPersistencePort;
 import com.emazon.cart.domain.spi.UserPersistencePort;
 import com.emazon.cart.domain.utils.DomainConstants;
+import com.emazon.cart.domain.utils.filter.ItemFilter;
+import com.emazon.cart.domain.utils.pagination.DomainPage;
+import com.emazon.cart.domain.utils.pagination.PaginationData;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -24,6 +27,10 @@ public class CartUseCase implements CartServicePort {
     private final UserPersistencePort userPersistencePort;
     private final ProductPersistencePort productPersistencePort;
     private final ItemPersistencePort itemPersistencePort;
+
+    private static final Integer NOT_CONTENT_TOTAL_PAGES = 1;
+    private static final Integer NOT_CONTENT_PAGE_COUNT = 0;
+    private static final Long NOT_CONTENT_PAGE_TOTAL_COUNT = 0L;
 
     public CartUseCase(CartPersistencePort cartPersistencePort, UserPersistencePort userPersistencePort, ProductPersistencePort productPersistencePort, ItemPersistencePort itemPersistencePort) {
         this.cartPersistencePort = cartPersistencePort;
@@ -46,7 +53,7 @@ public class CartUseCase implements CartServicePort {
             List<Product> products = productPersistencePort.getProductsById(ids);
 
             for (int index = 0; index < products.size(); index++) {
-                if (products.get(index).getQuantity() < items.get(index).getQuantity()){
+                if (products.get(index).getQuantity() < items.get(index).getQuantity()) {
                     throw new NotEnoughProductStockException(products.get(index).getName());
                 }
             }
@@ -55,11 +62,9 @@ public class CartUseCase implements CartServicePort {
 
         validateItem(item, cart, product);
         item.setCart(cart);
-        cart.addItem(
-                itemPersistencePort.save(item)
-        );
-        updateCar(cart);
-        return cart;
+        itemPersistencePort.save(item);
+
+        return updateCar(cart);
     }
 
     @Override
@@ -70,9 +75,49 @@ public class CartUseCase implements CartServicePort {
         return updateCar(cart);
     }
 
+    @Override
+    public DomainPage<Item> getItems(String userId, ItemFilter filter, PaginationData data) {
+
+        Cart cart = getCarByUserIdOrCreate(userId);
+        List<Item> items = cart.getItems();
+        if (items == null || items.isEmpty()) return new DomainPage<>(
+                DomainConstants.DEFAULT_PAGE_NUMBER,
+                DomainConstants.DEFAULT_PAGE_SIZE,
+                NOT_CONTENT_TOTAL_PAGES,
+                NOT_CONTENT_PAGE_COUNT,
+                NOT_CONTENT_PAGE_TOTAL_COUNT,
+                List.of());
+        List<Long> ids = items.stream().map(Item::getProductId).toList();
+        filter.setIds(ids);
+        DomainPage<Product> productPage = productPersistencePort.getAllProducts(filter, data);
+        return mapProductPage2ItemPage(items, productPage);
+    }
+
+    private DomainPage<Item> mapProductPage2ItemPage(List<Item> items, DomainPage<Product> productPage) {
+        DomainPage<Item> page = new DomainPage<>(
+                productPage.getPage(),
+                productPage.getPageSize(),
+                productPage.getTotalPages(),
+                productPage.getCount(),
+                productPage.getTotalCount(),
+                List.of()
+        );
+        page.setContent(
+                productPage.getContent().stream().map(product -> {
+                    Item foundItem = items.stream().filter(item -> item.getProductId().equals(product.getId()))
+                            .findAny().orElseThrow(() -> new EntityNotFoundException(Item.class.getSimpleName(), product.getId().toString()));
+                    foundItem.setCategories(product.getCategories());
+                    foundItem.setBrand(product.getBrand());
+                    foundItem.setName(product.getName());
+                    return foundItem;
+                }).toList()
+        );
+        return page;
+    }
+
     private void validateItem(Item item, Cart cart, Product product) {
         if (product.getQuantity() < item.getQuantity()) throw new NotEnoughProductStockException(product.getName());
-        if(itemPersistencePort.existsByProductIdAndCarId(item.getProductId(), cart.getId()))
+        if (itemPersistencePort.existsByProductIdAndCarId(item.getProductId(), cart.getId()))
             throw new ItemAlreadyAddedException(cart.getId());
     }
 
@@ -99,8 +144,9 @@ public class CartUseCase implements CartServicePort {
         });
     }
 
-    private Cart updateCar(Cart cart){
+    private Cart updateCar(Cart cart) {
         cart.setUpdatedAt(LocalDateTime.now());
         return cartPersistencePort.updateCar(cart);
     }
+
 }
