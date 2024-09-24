@@ -2,10 +2,7 @@ package com.emazon.cart.configuration;
 
 import com.emazon.cart.domain.api.CartServicePort;
 import com.emazon.cart.domain.api.usecase.CartUseCase;
-import com.emazon.cart.domain.spi.CartPersistencePort;
-import com.emazon.cart.domain.spi.ItemPersistencePort;
-import com.emazon.cart.domain.spi.ProductPersistencePort;
-import com.emazon.cart.domain.spi.UserPersistencePort;
+import com.emazon.cart.domain.spi.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,10 +20,11 @@ public class BeanConfiguration {
     private final UserPersistencePort userPersistencePort;
     private final ItemPersistencePort itemPersistencePort;
     private final ProductPersistencePort productPersistencePort;
+    private final SupplyPersistencePort supplyPersistencePort;
 
     @Bean
     CartServicePort carServicePort() {
-        return new CartUseCase(cartPersistencePort, userPersistencePort, productPersistencePort, itemPersistencePort);
+        return new CartUseCase(cartPersistencePort, userPersistencePort, productPersistencePort, itemPersistencePort, supplyPersistencePort);
     }
 
     // security

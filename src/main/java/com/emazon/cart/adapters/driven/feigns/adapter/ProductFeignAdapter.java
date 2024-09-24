@@ -8,13 +8,11 @@ import com.emazon.cart.domain.exceptions.EntityNotFoundException;
 import com.emazon.cart.domain.model.Product;
 import com.emazon.cart.domain.spi.ProductPersistencePort;
 import com.emazon.cart.domain.utils.filter.ItemFilter;
-import com.emazon.cart.domain.utils.pagination.DomainPage;
+import com.emazon.cart.domain.utils.pagination.CartPage;
 import com.emazon.cart.domain.utils.pagination.PaginationData;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
@@ -48,7 +46,7 @@ public class ProductFeignAdapter implements ProductPersistencePort {
     }
 
     @Override
-    public DomainPage<Product> getAllProducts(ItemFilter itemFilter, PaginationData data) {
+    public CartPage<Product> getAllProducts(ItemFilter itemFilter, PaginationData data) {
         ProductQuery query = productQueryMapper.toRequest(itemFilter, data);
         return productResponseMapper.toDomainPage(
                 productFeign.getProducts(query)

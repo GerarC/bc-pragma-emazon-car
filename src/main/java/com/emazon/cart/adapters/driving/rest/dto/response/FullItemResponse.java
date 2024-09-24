@@ -2,7 +2,10 @@ package com.emazon.cart.adapters.driving.rest.dto.response;
 
 import lombok.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.function.Function;
 
 @Data
 @Getter
@@ -13,7 +16,10 @@ import java.util.List;
 public class FullItemResponse {
     private Long productId;
     private String name;
+    private BigDecimal price;
     private Integer quantity;
-    private List<String> categories;
     private String brand;
+    private List<String> categories;
+    private Boolean hasStock;
+    private LocalDateTime nextSupplyDate;
 }
