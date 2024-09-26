@@ -5,7 +5,6 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.function.Function;
 
 @Data
 @Getter
@@ -18,6 +17,7 @@ public class FullItemResponse {
     private String name;
     private BigDecimal price;
     private Integer quantity;
+    private Long stockQuantity;
     private String brand;
     private List<String> categories;
     private Boolean hasStock;

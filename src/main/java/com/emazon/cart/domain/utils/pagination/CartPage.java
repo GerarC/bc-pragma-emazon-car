@@ -82,4 +82,17 @@ public class CartPage<T> {
     public void setContent(List<T> content) {
         this.content = content;
     }
+
+    @Override
+    public String toString() {
+        return "CartPage{" +
+                "page=" + page +
+                ", pageSize=" + pageSize +
+                ", totalPages=" + totalPages +
+                ", count=" + count +
+                ", totalCount=" + totalCount +
+                ", totalPrice=" + totalPrice +
+                ", content=" + content +
+                '}';
+    }
 }

@@ -80,6 +80,17 @@ public class CartController {
 
     }
 
+    @Operation(summary = RestConstants.SWAGGER_GET_ALL_CART_ITEMS_SUMMARY)
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = RestConstants.CODE_OK,
+                    description = RestConstants.SWAGGER_GET_ALL_CART_ITEMS_SUMMARY,
+                    useReturnTypeSchema = true),
+            @ApiResponse(
+                    responseCode = RestConstants.CODE_BAD_REQUEST,
+                    description = RestConstants.SWAGGER_VALIDATIONS_DONT_PASS,
+                    content = @Content(schema = @Schema(implementation = ValidationExceptionResponse.class))),
+    })
     @GetMapping("/{user-id}/items")
     @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<PageResponse<FullItemResponse>> getCartItems(

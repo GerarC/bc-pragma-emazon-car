@@ -3,25 +3,29 @@ package com.emazon.cart.domain.api.usecase;
 import com.emazon.cart.domain.model.Cart;
 import com.emazon.cart.domain.model.Item;
 import com.emazon.cart.domain.model.Product;
-import com.emazon.cart.domain.spi.CartPersistencePort;
-import com.emazon.cart.domain.spi.ItemPersistencePort;
-import com.emazon.cart.domain.spi.ProductPersistencePort;
-import com.emazon.cart.domain.spi.UserPersistencePort;
+import com.emazon.cart.domain.spi.*;
+import com.emazon.cart.domain.utils.filter.ItemFilter;
+import com.emazon.cart.domain.utils.pagination.CartPage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class CartUseCaseTest {
+    private static final Logger log = LoggerFactory.getLogger(CartUseCaseTest.class);
     @Mock
     private CartPersistencePort cartPersistencePort;
     @Mock
@@ -30,6 +34,8 @@ class CartUseCaseTest {
     private ProductPersistencePort productPersistencePort;
     @Mock
     private ItemPersistencePort itemPersistencePort;
+    @Mock
+    private SupplyPersistencePort supplyPersistencePort;
 
     @InjectMocks
     private CartUseCase carUserCase;
@@ -43,20 +49,30 @@ class CartUseCaseTest {
     void addItem() {
         String carId = "carId";
         String userId = "userId";
-        Item item = new Item(5L, 5L, 10, null);
+        Item item = new Item(5L, 5L, "name", BigDecimal.ONE, 10, null,
+                List.of("Category5", "Category6"), "brand", false, 1000L, null);
         List<Item> items = new ArrayList<>(List.of(
-                new Item(1L, 1L, 10, null),
-                new Item(2L, 2L, 10, null),
-                new Item(3L, 3L, 10, null),
-                new Item(4L, 4L, 10, null)
+                new Item(1L, 1L, "name", BigDecimal.ONE, 10, null,
+                        List.of("Category1", "Category2"), "brand", true, 1000L, null),
+                new Item(2L, 2L, "name", BigDecimal.ONE, 10, null,
+                        List.of("Category2", "Category3"), "brand", true, 1000L, null),
+                new Item(3L, 3L, "name", BigDecimal.ONE, 10, null,
+                        List.of("Category3", "Category4"), "brand", true, 1000L, null),
+                new Item(4L, 4L, "name", BigDecimal.ONE, 10, null,
+                        List.of("Category4", "Category5"), "brand", true, 1000L, null)
         ));
 
-        Product product = new Product(5L, "name", "description", "brand", 1000L, List.of("Category5", "Category6"));
+        Product product = new Product(5L, "name", "description", "brand",
+                BigDecimal.ONE, 1000L, List.of("Category5", "Category6"));
         List<Product> products = List.of(
-                new Product(1L, "name", "description", "brand", 1000L, List.of("Category1", "Category2")),
-                new Product(1L, "name", "description", "brand", 1000L, List.of("Category2", "Category3")),
-                new Product(1L, "name", "description", "brand", 1000L, List.of("Category3", "Category4")),
-                new Product(1L, "name", "description", "brand", 1000L, List.of("Category4", "Category5"))
+                new Product(1L, "name", "description", "brand",
+                        BigDecimal.ONE, 1000L, List.of("Category1", "Category2")),
+                new Product(2L, "name", "description", "brand",
+                        BigDecimal.ONE, 1000L, List.of("Category2", "Category3")),
+                new Product(3L, "name", "description", "brand",
+                        BigDecimal.ONE, 1000L, List.of("Category3", "Category4")),
+                new Product(4L, "name", "description", "brand",
+                        BigDecimal.ONE, 1000L, List.of("Category4", "Category5"))
         );
         Cart cart = new Cart(carId, userId, LocalDateTime.now(), LocalDateTime.now(), items);
 
@@ -71,7 +87,7 @@ class CartUseCaseTest {
         assertNotNull(returnedCart);
         assertEquals(returnedCart.getId(), carId);
         assertEquals(returnedCart.getUserId(), userId);
-        assertEquals(5, returnedCart.getItems().size());
+        assertEquals(4, returnedCart.getItems().size());
     }
 
     @Test
@@ -79,11 +95,16 @@ class CartUseCaseTest {
         Long productId = 1L;
         String carId = "carId";
         String userId = "userId";
-        Item item = new Item(1L, 1L, 10, null);
+        Item item =
+        new Item(1L, 1L, "name", BigDecimal.ONE, 10, null, List.of("Category1", "Category2"),
+                "brand", true, 1000L, null);
         List<Item> items = new ArrayList<>(List.of(
-                new Item(2L, 2L, 10, null),
-                new Item(3L, 3L, 10, null),
-                new Item(4L, 4L, 10, null)
+                new Item(2L, 2L, "name", BigDecimal.ONE, 10, null,
+                        List.of("Category2", "Category3"), "brand", true, 1000L, null),
+                new Item(3L, 3L, "name", BigDecimal.ONE, 10, null,
+                        List.of("Category3", "Category4"), "brand", true, 1000L, null),
+                new Item(4L, 4L, "name", BigDecimal.ONE, 10, null,
+                        List.of("Category4", "Category5"), "brand", true, 1000L, null)
         ));
         Cart cart = new Cart(carId, userId, LocalDateTime.now(), LocalDateTime.now(), items);
 
@@ -96,5 +117,89 @@ class CartUseCaseTest {
         verify(cartPersistencePort).updateCar(any());
         assertNotNull(returnedCart);
         assertEquals(returnedCart.getId(), carId);
+    }
+
+    @Test
+    void getItems() {
+        String carId = "carId";
+        String userId = "userId";
+        List<Long> ids = List.of(1L, 2L, 3L, 4L);
+        List<Item> items = new ArrayList<>(List.of(
+                new Item(1L, 1L, "name", BigDecimal.ONE, 10, null,
+                        List.of("Category1", "Category2"), "brand", true, 1000L, null),
+                new Item(2L, 2L, "name", BigDecimal.ONE, 10, null,
+                        List.of("Category2", "Category3"), "brand", true, 1000L, null),
+                new Item(3L, 3L, "name", BigDecimal.ONE, 10, null,
+                        List.of("Category3", "Category4"), "brand", true, 1000L, null),
+                new Item(4L, 4L, "name", BigDecimal.ONE, 10, null,
+                        List.of("Category4", "Category5"), "brand", true, 1000L, null)
+        ));
+        List<Product> products = List.of(
+                new Product(1L, "name", "description", "brand",
+                        BigDecimal.ONE, 1000L, List.of("Category1", "Category2")),
+                new Product(2L, "name", "description", "brand",
+                        BigDecimal.ONE, 1000L, List.of("Category2", "Category3")),
+                new Product(3L, "name", "description", "brand",
+                        BigDecimal.ONE, 1000L, List.of("Category3", "Category4")),
+                new Product(4L, "name", "description", "brand",
+                        BigDecimal.ONE, 1000L, List.of("Category4", "Category5"))
+        );
+        Cart cart = new Cart(carId, userId, LocalDateTime.now(), LocalDateTime.now(), items);
+        ItemFilter filter = new ItemFilter(ids, null, null, null);
+        CartPage<Product> mockPage = new CartPage<>();
+        mockPage.setContent(products);
+
+
+        when(cartPersistencePort.getCarByUserId(userId)).thenReturn(cart);
+        when(productPersistencePort.getAllProducts(filter, null)).thenReturn(mockPage);
+        when(productPersistencePort.getProductsById(any())).thenReturn(products);
+
+        CartPage<Item> returnedPage = carUserCase.getItems(userId, filter, null);
+        log.trace(returnedPage.toString());
+        assertNotNull(returnedPage);
+        assertEquals(returnedPage.getContent().size(), products.size());
+    }
+
+    @Test
+    void getItemsNotStock() {
+        Random random = new Random();
+        String carId = "carId";
+        String userId = "userId";
+        List<Long> ids = List.of(1L, 2L, 3L, 4L);
+        List<Item> items = new ArrayList<>(List.of(
+                new Item(1L, 1L, "name", BigDecimal.ONE, 10, null,
+                        List.of("Category1", "Category2"), "brand", true, 1000L, null),
+                new Item(2L, 2L, "name", BigDecimal.ONE, 10, null,
+                        List.of("Category2", "Category3"), "brand", true, 1000L, null),
+                new Item(3L, 3L, "name", BigDecimal.ONE, 10, null,
+                        List.of("Category3", "Category4"), "brand", true, 1000L, null),
+                new Item(4L, 4L, "name", BigDecimal.ONE, 10, null,
+                        List.of("Category4", "Category5"), "brand", true, 1000L, null)
+        ));
+        List<Product> products = List.of(
+                new Product(1L, "name", "description", "brand",
+                        BigDecimal.ONE, 1L, List.of("Category1", "Category2")),
+                new Product(2L, "name", "description", "brand",
+                        BigDecimal.ONE, 1L, List.of("Category2", "Category3")),
+                new Product(3L, "name", "description", "brand",
+                        BigDecimal.ONE, 1L, List.of("Category3", "Category4")),
+                new Product(4L, "name", "description", "brand",
+                        BigDecimal.ONE, 1L, List.of("Category4", "Category5"))
+        );
+        Cart cart = new Cart(carId, userId, LocalDateTime.now(), LocalDateTime.now(), items);
+        ItemFilter filter = new ItemFilter(ids, null, null, null);
+        CartPage<Product> mockPage = new CartPage<>();
+        mockPage.setContent(products);
+
+
+        when(cartPersistencePort.getCarByUserId(userId)).thenReturn(cart);
+        when(productPersistencePort.getAllProducts(filter, null)).thenReturn(mockPage);
+        when(productPersistencePort.getProductsById(any())).thenReturn(products);
+        when(supplyPersistencePort.nextSupplyDate(any())).thenReturn(LocalDateTime.now().plusDays(random.nextInt(10)));
+
+        CartPage<Item> returnedPage = carUserCase.getItems(userId, filter, null);
+        assertNotNull(returnedPage);
+        assertEquals(returnedPage.getContent().size(), products.size());
+        returnedPage.getContent().forEach(item -> assertFalse(item.getHasStock()));
     }
 }

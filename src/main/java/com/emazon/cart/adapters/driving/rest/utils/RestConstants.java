@@ -24,4 +24,7 @@ public class RestConstants {
     public static final String SWAGGER_REMOVE_ITEM_RESPONSE = "Car without that item";
     public static final String SWAGGER_REMOVE_ITEM_NOT_FOUND = "The car of the user have no item with that product id";
     public static final String SWAGGER_CAR_NOT_FOUND = "User have not car associated with their id";
+
+    public static final String SWAGGER_GET_ALL_CART_ITEMS_SUMMARY = "Get all user's cart items paginated";
+    public static final String SWAGGER_GET_ALL_CART_ITEMS_RESPONSE = "A list of all user's cart items";
 }

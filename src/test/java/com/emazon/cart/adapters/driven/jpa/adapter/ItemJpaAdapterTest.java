@@ -11,6 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -70,7 +72,8 @@ class ItemJpaAdapterTest {
         Long id = 1L;
         Long productId = 1L;
         String carId = "carId";
-        Item item = new Item(id, productId, 0, null);
+        Item item = new Item(id, productId,"name", BigDecimal.ONE, 1, null, List.of("category"), "brand",
+                true, 2L, null);
         ItemEntity itemEntity = new ItemEntity(id, productId, 0, null);
         when(itemEntityMapper.toDomain(itemEntity)).thenReturn(item);
         when(itemRepository.findByProductIdAndCartId(productId, carId)).thenReturn(Optional.of(itemEntity));
