@@ -5,7 +5,7 @@ public class DomainConstants {
         throw new IllegalStateException("Utility class");
     }
 
-    public static final String USER_ENTITY_NAME = "User";
+    public static final String USER_ENTITY_NAME = "There isn't valid current user";
     public static final Integer MAX_CATEGORY_ITEMS = 3;
 
     public static final String ENTITY_NOT_FOUND_MESSAGE = "Entity of type '%s' with id '%s' not found";

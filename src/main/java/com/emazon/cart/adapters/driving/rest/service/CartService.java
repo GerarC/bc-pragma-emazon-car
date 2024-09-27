@@ -8,7 +8,7 @@ import com.emazon.cart.adapters.driving.rest.dto.response.FullItemResponse;
 import com.emazon.cart.adapters.driving.rest.dto.response.PageResponse;
 
 public interface CartService {
-    CarResponse addItem(String userId, ItemRequest itemRequest);
-    CarResponse removeItem(String userId, Long productId);
-    PageResponse<FullItemResponse> getItems(String userId, ItemFilterRequest filter, PageQuery query);
+    CarResponse addItem(ItemRequest itemRequest);
+    CarResponse removeItem(Long productId);
+    PageResponse<FullItemResponse> getItems(ItemFilterRequest filter, PageQuery query);
 }

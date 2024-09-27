@@ -44,9 +44,9 @@ public class CartUseCase implements CartServicePort {
     }
 
     @Override
-    public Cart addItem(String userId, Item newItem) {
-        if (!userPersistencePort.existsUserById(userId))
-            throw new EntityNotFoundException(DomainConstants.USER_ENTITY_NAME, userId);
+    public Cart addItem(Item newItem) {
+        String userId = userPersistencePort.getIdFromCurrentUser();
+        if (userId == null) throw new EntityNotFoundException(DomainConstants.USER_ENTITY_NAME);
         List<Long> ids;
         List<Product> products;
 
@@ -72,7 +72,9 @@ public class CartUseCase implements CartServicePort {
     }
 
     @Override
-    public Cart removeItem(String userId, Long productId) {
+    public Cart removeItem(Long productId) {
+        String userId = userPersistencePort.getIdFromCurrentUser();
+        if (userId == null) throw new EntityNotFoundException(DomainConstants.USER_ENTITY_NAME);
         Cart cart = cartPersistencePort.getCarByUserId(userId);
         Item item = itemPersistencePort.findByProductIdAndCarId(productId, cart.getId());
         itemPersistencePort.deleteById(item.getId());
@@ -80,7 +82,9 @@ public class CartUseCase implements CartServicePort {
     }
 
     @Override
-    public CartPage<Item> getItems(String userId, ItemFilter filter, PaginationData data) {
+    public CartPage<Item> getItems(ItemFilter filter, PaginationData data) {
+        String userId = userPersistencePort.getIdFromCurrentUser();
+        if (userId == null) throw new EntityNotFoundException(DomainConstants.USER_ENTITY_NAME);
         Cart cart = getCarByUserIdOrCreate(userId);
         List<Item> items = cart.getItems();
         if (items == null || items.isEmpty()) return new CartPage<>(
@@ -96,6 +100,13 @@ public class CartUseCase implements CartServicePort {
         CartPage<Product> productPage = productPersistencePort.getAllProducts(filter, data);
         BigDecimal totalPrice = calculateTotalPrice(cart);
         return mapProductPage2ItemPage(items, productPage, totalPrice);
+    }
+
+    @Override
+    public List<Item> buy() {
+        String userId = userPersistencePort.getIdFromCurrentUser();
+        if (userId == null) throw new EntityNotFoundException(DomainConstants.USER_ENTITY_NAME);
+        return List.of();
     }
 
     private CartPage<Item> mapProductPage2ItemPage(List<Item> items, CartPage<Product> productPage, BigDecimal totalPrice) {

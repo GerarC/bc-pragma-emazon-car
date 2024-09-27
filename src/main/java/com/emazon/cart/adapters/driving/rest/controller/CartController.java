@@ -47,12 +47,11 @@ public class CartController {
                     description = RestConstants.SWAGGER_VALIDATIONS_DONT_PASS,
                     content = @Content(schema = @Schema(implementation = ValidationExceptionResponse.class))),
     })
-    @PostMapping("/{user-id}/items")
+    @PostMapping("/items")
     @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<CarResponse> addItem(
-            @PathVariable("user-id") String userId,
             @RequestBody @Valid ItemRequest itemRequest) {
-        return ResponseEntity.ok(cartService.addItem(userId, itemRequest));
+        return ResponseEntity.ok(cartService.addItem(itemRequest));
     }
 
     @Operation(summary = RestConstants.SWAGGER_REMOVE_ITEM_SUMMARY)
@@ -70,13 +69,11 @@ public class CartController {
                     description = RestConstants.SWAGGER_CAR_NOT_FOUND,
                     content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
     })
-    // Yes I know I can get userId from token, but I don't like to have jwtService in every microservice
-    @DeleteMapping("/{user-id}/items/{product-id}")
+    @DeleteMapping("/items/{product-id}")
     @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<CarResponse> deleteItem(
-            @PathVariable("user-id") String userId,
             @PathVariable("product-id") Long productId) {
-        return ResponseEntity.ok(cartService.removeItem(userId, productId));
+        return ResponseEntity.ok(cartService.removeItem(productId));
 
     }
 
@@ -91,13 +88,12 @@ public class CartController {
                     description = RestConstants.SWAGGER_VALIDATIONS_DONT_PASS,
                     content = @Content(schema = @Schema(implementation = ValidationExceptionResponse.class))),
     })
-    @GetMapping("/{user-id}/items")
+    @GetMapping("/items")
     @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<PageResponse<FullItemResponse>> getCartItems(
-            @PathVariable("user-id") String userId,
             @Nullable ItemFilterRequest filter,
-            @Nullable PageQuery query){
-        return ResponseEntity.ok(cartService.getItems(userId, filter, query));
+            @Nullable PageQuery query) {
+        return ResponseEntity.ok(cartService.getItems(filter, query));
     }
 
 }

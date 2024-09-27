@@ -83,7 +83,7 @@ class CartUseCaseTest {
         when(itemPersistencePort.save(item)).thenReturn(item);
         when(cartPersistencePort.updateCar(any())).thenReturn(cart);
 
-        Cart returnedCart = carUserCase.addItem(userId, item);
+        Cart returnedCart = carUserCase.addItem(item);
         assertNotNull(returnedCart);
         assertEquals(returnedCart.getId(), carId);
         assertEquals(returnedCart.getUserId(), userId);
@@ -112,7 +112,7 @@ class CartUseCaseTest {
         when(itemPersistencePort.findByProductIdAndCarId(1L, carId)).thenReturn(item);
         doNothing().when(itemPersistencePort).deleteById(any());
         when(cartPersistencePort.updateCar(any())).thenReturn(cart);
-        Cart returnedCart = carUserCase.removeItem(userId, productId);
+        Cart returnedCart = carUserCase.removeItem(productId);
         verify(itemPersistencePort).deleteById(any());
         verify(cartPersistencePort).updateCar(any());
         assertNotNull(returnedCart);
@@ -154,7 +154,7 @@ class CartUseCaseTest {
         when(productPersistencePort.getAllProducts(filter, null)).thenReturn(mockPage);
         when(productPersistencePort.getProductsById(any())).thenReturn(products);
 
-        CartPage<Item> returnedPage = carUserCase.getItems(userId, filter, null);
+        CartPage<Item> returnedPage = carUserCase.getItems(filter, null);
         log.trace(returnedPage.toString());
         assertNotNull(returnedPage);
         assertEquals(returnedPage.getContent().size(), products.size());
@@ -197,7 +197,7 @@ class CartUseCaseTest {
         when(productPersistencePort.getProductsById(any())).thenReturn(products);
         when(supplyPersistencePort.nextSupplyDate(any())).thenReturn(LocalDateTime.now().plusDays(random.nextInt(10)));
 
-        CartPage<Item> returnedPage = carUserCase.getItems(userId, filter, null);
+        CartPage<Item> returnedPage = carUserCase.getItems(filter, null);
         assertNotNull(returnedPage);
         assertEquals(returnedPage.getContent().size(), products.size());
         returnedPage.getContent().forEach(item -> assertFalse(item.getHasStock()));

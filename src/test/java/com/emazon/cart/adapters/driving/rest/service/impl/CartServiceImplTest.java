@@ -67,9 +67,9 @@ class CartServiceImplTest {
         CarResponse carResponse = new CarResponse(userId, LocalDateTime.now(), LocalDateTime.now(), List.of(itemResponse));
         when(cartResponseMapper.toResponse(any())).thenReturn(carResponse);
         when(itemRequestMapper.toDomain(any())).thenReturn(item);
-        when(cartServicePort.addItem(any(), any())).thenReturn(cart);
-        CarResponse returnedResponse = carServiceImpl.addItem(userId, itemRequest);
-        verify(cartServicePort).addItem(any(), any());
+        when(cartServicePort.addItem(any())).thenReturn(cart);
+        CarResponse returnedResponse = carServiceImpl.addItem(itemRequest);
+        verify(cartServicePort).addItem(any());
         assertNotNull(returnedResponse);
         assertEquals(carResponse, returnedResponse);
     }
@@ -86,16 +86,15 @@ class CartServiceImplTest {
         CarResponse carResponse = new CarResponse(userId, LocalDateTime.now(), LocalDateTime.now(), List.of(itemResponse));
 
         when(cartResponseMapper.toResponse(any())).thenReturn(carResponse);
-        when(cartServicePort.removeItem(any(), any())).thenReturn(cart);
-        CarResponse response = carServiceImpl.removeItem(userId, item.getId());
-        verify(cartServicePort).removeItem(any(), any());
+        when(cartServicePort.removeItem(any())).thenReturn(cart);
+        CarResponse response = carServiceImpl.removeItem(item.getId());
+        verify(cartServicePort).removeItem(any());
         assertNotNull(response);
         assertEquals(carResponse, response);
     }
 
     @Test
     void getItems() {
-        String userId = "userId";
         List<Long> ids = List.of(1L, 2L, 3L, 4L);
         List<Item> items = new ArrayList<>(List.of(
                 new Item(1L, 1L, "name", BigDecimal.ONE, 10, null,
@@ -129,10 +128,10 @@ class CartServiceImplTest {
 
         when(itemFilterRequestMapper.toDomain(filterRequest)).thenReturn(filter);
         when(pageQueryMapper.toDomain(any())).thenReturn(null);
-        when(cartServicePort.getItems(any(), any(), any())).thenReturn(cartPage);
+        when(cartServicePort.getItems(any(), any())).thenReturn(cartPage);
         when(fullItemResponseMapper.toPageResponse(any())).thenReturn(pageResponse);
 
-        PageResponse<FullItemResponse> response = carServiceImpl.getItems(userId, filterRequest, null);
+        PageResponse<FullItemResponse> response = carServiceImpl.getItems(filterRequest, null);
 
         assertNotNull(response);
         assertEquals(pageResponse, response);

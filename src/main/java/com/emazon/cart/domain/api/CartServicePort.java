@@ -6,8 +6,11 @@ import com.emazon.cart.domain.utils.filter.ItemFilter;
 import com.emazon.cart.domain.utils.pagination.CartPage;
 import com.emazon.cart.domain.utils.pagination.PaginationData;
 
+import java.util.List;
+
 public interface CartServicePort {
-    Cart addItem(String userId, Item item);
-    Cart removeItem(String userId, Long itemId);
-    CartPage<Item> getItems(String userId, ItemFilter filter, PaginationData data);
+    Cart addItem(Item item);
+    Cart removeItem(Long itemId);
+    CartPage<Item> getItems(ItemFilter filter, PaginationData data);
+    List<Item> buy();
 }

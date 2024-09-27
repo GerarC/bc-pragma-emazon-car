@@ -30,27 +30,27 @@ public class CartServiceImpl implements CartService {
     private final FullItemResponseMapper fullItemResponseMapper;
 
     @Override
-    public CarResponse addItem(String userId, ItemRequest itemRequest) {
+    public CarResponse addItem(ItemRequest itemRequest) {
         Item item = itemRequestMapper.toDomain(itemRequest);
         return cartResponseMapper.toResponse(
-                cartServicePort.addItem(userId, item)
+                cartServicePort.addItem(item)
         );
     }
 
     @Override
-    public CarResponse removeItem(String userId, Long productId) {
+    public CarResponse removeItem(Long productId) {
         return cartResponseMapper.toResponse(
-                cartServicePort.removeItem(userId, productId)
+                cartServicePort.removeItem(productId)
         );
     }
 
     @Override
-    public PageResponse<FullItemResponse> getItems(String userId, ItemFilterRequest filter, PageQuery query) {
+    public PageResponse<FullItemResponse> getItems(ItemFilterRequest filter, PageQuery query) {
         ItemFilter domainFilter = itemFilterRequestMapper.toDomain(filter);
         PaginationData domainData = pageQueryMapper.toDomain(query);
 
         return fullItemResponseMapper.toPageResponse(
-                cartServicePort.getItems(userId, domainFilter, domainData)
+                cartServicePort.getItems(domainFilter, domainData)
         );
     }
 }

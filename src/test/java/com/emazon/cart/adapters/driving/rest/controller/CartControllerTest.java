@@ -50,8 +50,8 @@ class CartControllerTest {
         ItemRequest itemRequest = new ItemRequest(5L, 10);
         ItemResponse itemResponse = new ItemResponse(5L, "name", BigDecimal.ONE, 10, true, null);
         CarResponse carResponse = new CarResponse(userId, LocalDateTime.now(), LocalDateTime.now(), List.of(itemResponse));
-        when(cartService.addItem(any(), any())).thenReturn(carResponse);
-        this.mockMvc.perform(post("/carts/{user-id}/items", userId)
+        when(cartService.addItem(any())).thenReturn(carResponse);
+        this.mockMvc.perform(post("/carts/items")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonParser.toJson(itemRequest)))
                 .andExpect(status().isOk());
@@ -62,15 +62,14 @@ class CartControllerTest {
         String userId = "userId";
         ItemResponse itemResponse = new ItemResponse(5L, "name", BigDecimal.ONE, 10, true, null);
         CarResponse carResponse = new CarResponse(userId, LocalDateTime.now(), LocalDateTime.now(), List.of(itemResponse));
-        when(cartService.removeItem(any(), any())).thenReturn(carResponse);
-        this.mockMvc.perform(delete("/carts/{user-id}/items/{id}", userId, 5L)
+        when(cartService.removeItem(any())).thenReturn(carResponse);
+        this.mockMvc.perform(delete("/carts/items/{id}", 5L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
     @Test
     void getCartItems() throws Exception {
-        String userId = "userId";
         List<FullItemResponse> responses = new ArrayList<>(List.of(
                 new FullItemResponse(1L, "name", BigDecimal.ONE, 10,
                         1000L, "brand", List.of("Category1", "Category2"),
@@ -87,8 +86,8 @@ class CartControllerTest {
         ));
         PageResponse<FullItemResponse> pageResponse = new PageResponse<>(0, 1, 1, 4, 4L, BigDecimal.valueOf(40), responses);
 
-        when(cartService.getItems(any(), any(), any())).thenReturn(pageResponse);
-        this.mockMvc.perform(get("/carts/{user-id}/items", userId)
+        when(cartService.getItems(any(), any())).thenReturn(pageResponse);
+        this.mockMvc.perform(get("/carts/items")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
