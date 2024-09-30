@@ -1,12 +1,13 @@
 package com.emazon.cart.adapters.driving.rest.controller;
 
-import com.emazon.cart.adapters.driving.rest.dto.request.ItemRequest;
-import com.emazon.cart.adapters.driving.rest.dto.response.CarResponse;
-import com.emazon.cart.adapters.driving.rest.dto.response.FullItemResponse;
-import com.emazon.cart.adapters.driving.rest.dto.response.ItemResponse;
-import com.emazon.cart.adapters.driving.rest.dto.response.PageResponse;
-import com.emazon.cart.adapters.driving.rest.service.CartService;
-import com.emazon.cart.adapters.driving.rest.utils.JsonParser;
+import com.emazon.cart.adapters.driving.rest.v1.controller.CartController;
+import com.emazon.cart.adapters.driving.rest.v1.dto.request.ItemRequest;
+import com.emazon.cart.adapters.driving.rest.v1.dto.response.CarResponse;
+import com.emazon.cart.adapters.driving.rest.v1.dto.response.FullItemResponse;
+import com.emazon.cart.adapters.driving.rest.v1.dto.response.ItemResponse;
+import com.emazon.cart.adapters.driving.rest.v1.dto.response.PageResponse;
+import com.emazon.cart.adapters.driving.rest.v1.service.CartService;
+import com.emazon.cart.adapters.driving.rest.v1.utils.JsonParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;

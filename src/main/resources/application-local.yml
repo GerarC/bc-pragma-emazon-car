@@ -25,15 +25,19 @@ logging:
 
 server:
     port: 8093
+    servlet:
+        context-path: ${EMAZON_CART_CONTEXT_PATH:/emazon/cart}
 
 allowed-origins:
     http://localhost:3000/,
     *,
 
 emazon:
-    stock:
-        base-url: localhost:8091
     user:
-        base-url: localhost:8090
+        base-url: localhost:8090/emazon/user
+    stock:
+        base-url: localhost:8091/emazon/stock
     transaction:
-        base-url: localhost:8092
+        base-url: localhost:8092/emazon/transaction
+    report:
+        base-url: localhost:8094/emazon/report

@@ -8,6 +8,7 @@ import com.emazon.cart.adapters.driven.jpa.persistence.ItemRepository;
 import com.emazon.cart.domain.exceptions.EntityNotFoundException;
 import com.emazon.cart.domain.model.Cart;
 import com.emazon.cart.domain.spi.CartPersistencePort;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Transactional
 public class CartJpaAdapter implements CartPersistencePort {
 
     private final CartRepository cartRepository;

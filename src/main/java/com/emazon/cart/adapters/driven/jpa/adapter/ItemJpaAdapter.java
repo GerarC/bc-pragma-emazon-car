@@ -7,11 +7,13 @@ import com.emazon.cart.domain.exceptions.EntityNotFoundException;
 import com.emazon.cart.domain.model.Item;
 import com.emazon.cart.domain.spi.ItemPersistencePort;
 import com.emazon.cart.domain.utils.DomainConstants;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Transactional
 public class ItemJpaAdapter implements ItemPersistencePort {
     private final ItemRepository itemRepository;
     private final ItemEntityMapper itemEntityMapper;

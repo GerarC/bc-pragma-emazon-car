@@ -21,10 +21,20 @@ public class BeanConfiguration {
     private final ItemPersistencePort itemPersistencePort;
     private final ProductPersistencePort productPersistencePort;
     private final SupplyPersistencePort supplyPersistencePort;
+    private final SalePersistencePort salePersistencePort;
+    private final SaleReportPersistencePort saleReportPersistencePort;
 
     @Bean
     CartServicePort carServicePort() {
-        return new CartUseCase(cartPersistencePort, userPersistencePort, productPersistencePort, itemPersistencePort, supplyPersistencePort);
+        return new CartUseCase(
+                cartPersistencePort,
+                userPersistencePort,
+                productPersistencePort,
+                itemPersistencePort,
+                supplyPersistencePort,
+                salePersistencePort,
+                saleReportPersistencePort
+        );
     }
 
     // security

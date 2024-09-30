@@ -5,6 +5,7 @@ import com.emazon.cart.domain.exceptions.*;
 import com.emazon.cart.domain.model.Cart;
 import com.emazon.cart.domain.model.Item;
 import com.emazon.cart.domain.model.Product;
+import com.emazon.cart.domain.model.SaleReport;
 import com.emazon.cart.domain.spi.*;
 import com.emazon.cart.domain.utils.DomainConstants;
 import com.emazon.cart.domain.utils.StreamUtils;
@@ -25,6 +26,8 @@ public class CartUseCase implements CartServicePort {
     private final ProductPersistencePort productPersistencePort;
     private final ItemPersistencePort itemPersistencePort;
     private final SupplyPersistencePort supplyPersistencePort;
+    private final SalePersistencePort salePersistencePort;
+    private final SaleReportPersistencePort saleReportPersistencePort;
 
     private static final Integer NOT_CONTENT_TOTAL_PAGES = 1;
     private static final Integer NOT_CONTENT_PAGE_COUNT = 0;
@@ -35,18 +38,20 @@ public class CartUseCase implements CartServicePort {
                        UserPersistencePort userPersistencePort,
                        ProductPersistencePort productPersistencePort,
                        ItemPersistencePort itemPersistencePort,
-                       SupplyPersistencePort supplyPersistencePort) {
+                       SupplyPersistencePort supplyPersistencePort, SalePersistencePort salePersistencePort, SaleReportPersistencePort saleReportPersistencePort) {
         this.cartPersistencePort = cartPersistencePort;
         this.userPersistencePort = userPersistencePort;
         this.productPersistencePort = productPersistencePort;
         this.itemPersistencePort = itemPersistencePort;
         this.supplyPersistencePort = supplyPersistencePort;
+        this.salePersistencePort = salePersistencePort;
+        this.saleReportPersistencePort = saleReportPersistencePort;
     }
 
     @Override
     public Cart addItem(Item newItem) {
         String userId = userPersistencePort.getIdFromCurrentUser();
-        if (userId == null) throw new EntityNotFoundException(DomainConstants.USER_ENTITY_NAME);
+        if (userId == null) throw new EntityNotFoundException(DomainConstants.NOT_CURRENT_USER_MESSAGE);
         List<Long> ids;
         List<Product> products;
 
@@ -57,7 +62,6 @@ public class CartUseCase implements CartServicePort {
         ids = new ArrayList<>(cartIdItems);
         ids.add(newItem.getProductId());
         products = productPersistencePort.getProductsById(ids);
-
 
         validateCanAddProduct(products);
         validateItem(newItem, cart, products.get(products.size() - 1));
@@ -74,7 +78,7 @@ public class CartUseCase implements CartServicePort {
     @Override
     public Cart removeItem(Long productId) {
         String userId = userPersistencePort.getIdFromCurrentUser();
-        if (userId == null) throw new EntityNotFoundException(DomainConstants.USER_ENTITY_NAME);
+        if (userId == null) throw new EntityNotFoundException(DomainConstants.NOT_CURRENT_USER_MESSAGE);
         Cart cart = cartPersistencePort.getCarByUserId(userId);
         Item item = itemPersistencePort.findByProductIdAndCarId(productId, cart.getId());
         itemPersistencePort.deleteById(item.getId());
@@ -84,7 +88,7 @@ public class CartUseCase implements CartServicePort {
     @Override
     public CartPage<Item> getItems(ItemFilter filter, PaginationData data) {
         String userId = userPersistencePort.getIdFromCurrentUser();
-        if (userId == null) throw new EntityNotFoundException(DomainConstants.USER_ENTITY_NAME);
+        if (userId == null) throw new EntityNotFoundException(DomainConstants.NOT_CURRENT_USER_MESSAGE);
         Cart cart = getCarByUserIdOrCreate(userId);
         List<Item> items = cart.getItems();
         if (items == null || items.isEmpty()) return new CartPage<>(
@@ -98,18 +102,37 @@ public class CartUseCase implements CartServicePort {
         List<Long> ids = StreamUtils.map(items, Item::getProductId);
         filter.setIds(ids);
         CartPage<Product> productPage = productPersistencePort.getAllProducts(filter, data);
-        BigDecimal totalPrice = calculateTotalPrice(cart);
+        BigDecimal totalPrice = getTotalPrice(
+                getCartItemInformation(cart)
+        );
         return mapProductPage2ItemPage(items, productPage, totalPrice);
     }
 
     @Override
-    public List<Item> buy() {
+    public void purchase() {
         String userId = userPersistencePort.getIdFromCurrentUser();
-        if (userId == null) throw new EntityNotFoundException(DomainConstants.USER_ENTITY_NAME);
-        return List.of();
+        if (userId == null) throw new EntityNotFoundException(DomainConstants.NOT_CURRENT_USER_MESSAGE);
+
+        Cart cart = cartPersistencePort.getCarByUserId(userId);
+        List<Item> items = cart.getItems();
+        List<Long> ids = StreamUtils.map(items, Item::getProductId);
+        List<Product> products = productPersistencePort.getProductsById(ids);
+
+        validateEnoughStockToBuy(items, products);
+        if (!salePersistencePort.performSale(items)) throw new BuyingProcessException();
+
+        items.forEach(item -> itemPersistencePort.deleteById(item.getId()));
+
+        updateCar(cart);
+        SaleReport report = createSaleReport(items, products);
+        saleReportPersistencePort.saveReport(report);
+
     }
 
-    private CartPage<Item> mapProductPage2ItemPage(List<Item> items, CartPage<Product> productPage, BigDecimal totalPrice) {
+    private CartPage<Item> mapProductPage2ItemPage(
+            List<Item> items,
+            CartPage<Product> productPage,
+            BigDecimal totalPrice) {
         CartPage<Item> page = new CartPage<>(
                 productPage.getPage(),
                 productPage.getPageSize(),
@@ -216,21 +239,47 @@ public class CartUseCase implements CartServicePort {
         return mappedItems;
     }
 
-    /**
-     * Get total price getting all the products of the cart and calculates its total price
-     *
-     * @param cart cart to calculate total price with
-     * @return Total price
-     */
-    private BigDecimal calculateTotalPrice(Cart cart) {
+    private List<Item> getCartItemInformation(Cart cart) {
         List<Item> items = cart.getItems();
         List<Long> ids = StreamUtils.map(items, Item::getProductId);
         List<Product> products = productPersistencePort.getProductsById(ids);
-        List<Item> mappedItems = mapItems(cart.getItems(), products);
 
+        return mapItems(cart.getItems(), products);
+    }
+
+    /**
+     * Calculates the total price of an item list if that list has the complete information about the items.
+     * In another way it throws zero
+     *
+     * @param mappedItems Items with the whole pricing information
+     * @return the total price of the item list
+     */
+    private BigDecimal getTotalPrice(List<Item> mappedItems) {
         return StreamUtils.mapAndReduce(mappedItems, ZERO_PRICE,
                 item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())),
                 BigDecimal::add
+        );
+    }
+
+    private void validateEnoughStockToBuy(List<Item> items, List<Product> products) {
+        StreamUtils.zip(items, products).forEach((item, product) -> {
+            if (product.getQuantity() < item.getQuantity()) {
+                LocalDateTime nextSupplyDate = supplyPersistencePort.nextSupplyDate(product.getId());
+                throw new NotEnoughProductStockException(product.getName(), nextSupplyDate);
+            }
+        });
+    }
+
+
+    private SaleReport createSaleReport(List<Item> items, List<Product> products) {
+        List<Item> reportItems = mapItems(items, products);
+        BigDecimal totalPrice = getTotalPrice(reportItems);
+        Integer count = items.size();
+        return new SaleReport(
+                LocalDateTime.now(),
+                totalPrice,
+                count,
+                reportItems
         );
     }
 }
