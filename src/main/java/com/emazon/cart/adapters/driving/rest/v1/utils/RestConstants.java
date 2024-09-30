@@ -27,4 +27,7 @@ public class RestConstants {
 
     public static final String SWAGGER_GET_ALL_CART_ITEMS_SUMMARY = "Get all user's cart items paginated";
     public static final String SWAGGER_GET_ALL_CART_ITEMS_RESPONSE = "A list of all user's cart items";
+
+    public static final String SWAGGER_PURCHASE_SUMMARY = "Inits the process of purchasing";
+    public static final String SWAGGER_PURCHASE_SUCCESSFUL = "A message that lets you know purchase is performed";
 }

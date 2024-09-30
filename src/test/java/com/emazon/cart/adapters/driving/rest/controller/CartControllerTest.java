@@ -2,12 +2,10 @@ package com.emazon.cart.adapters.driving.rest.controller;
 
 import com.emazon.cart.adapters.driving.rest.v1.controller.CartController;
 import com.emazon.cart.adapters.driving.rest.v1.dto.request.ItemRequest;
-import com.emazon.cart.adapters.driving.rest.v1.dto.response.CarResponse;
-import com.emazon.cart.adapters.driving.rest.v1.dto.response.FullItemResponse;
-import com.emazon.cart.adapters.driving.rest.v1.dto.response.ItemResponse;
-import com.emazon.cart.adapters.driving.rest.v1.dto.response.PageResponse;
+import com.emazon.cart.adapters.driving.rest.v1.dto.response.*;
 import com.emazon.cart.adapters.driving.rest.v1.service.CartService;
 import com.emazon.cart.adapters.driving.rest.v1.utils.JsonParser;
+import com.emazon.cart.domain.utils.DomainConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
@@ -28,6 +26,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(value = CartController.class)
@@ -52,7 +51,7 @@ class CartControllerTest {
         ItemResponse itemResponse = new ItemResponse(5L, "name", BigDecimal.ONE, 10, true, null);
         CarResponse carResponse = new CarResponse(userId, LocalDateTime.now(), LocalDateTime.now(), List.of(itemResponse));
         when(cartService.addItem(any())).thenReturn(carResponse);
-        this.mockMvc.perform(post("/carts/items")
+        this.mockMvc.perform(post("/v1/carts/items")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonParser.toJson(itemRequest)))
                 .andExpect(status().isOk());
@@ -64,7 +63,7 @@ class CartControllerTest {
         ItemResponse itemResponse = new ItemResponse(5L, "name", BigDecimal.ONE, 10, true, null);
         CarResponse carResponse = new CarResponse(userId, LocalDateTime.now(), LocalDateTime.now(), List.of(itemResponse));
         when(cartService.removeItem(any())).thenReturn(carResponse);
-        this.mockMvc.perform(delete("/carts/items/{id}", 5L)
+        this.mockMvc.perform(delete("/v1/carts/items/{id}", 5L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
@@ -88,9 +87,23 @@ class CartControllerTest {
         PageResponse<FullItemResponse> pageResponse = new PageResponse<>(0, 1, 1, 4, 4L, BigDecimal.valueOf(40), responses);
 
         when(cartService.getItems(any(), any())).thenReturn(pageResponse);
-        this.mockMvc.perform(get("/carts/items")
+        this.mockMvc.perform(get("/v1/carts/items")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
+    }
+
+    @Test
+    void testPurchase() throws Exception {
+        PurchaseProcessResponse response = PurchaseProcessResponse.builder()
+                .message(DomainConstants.SUCCESS_SALE_MESSAGE)
+                .build();
+
+        when(cartService.purchase()).thenReturn(response);
+
+        mockMvc.perform(post("/v1/carts/purchase")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value(DomainConstants.SUCCESS_SALE_MESSAGE));
     }
 }

@@ -2,10 +2,7 @@ package com.emazon.cart.adapters.driving.rest.service.impl;
 
 import com.emazon.cart.adapters.driving.rest.v1.dto.request.ItemRequest;
 import com.emazon.cart.adapters.driving.rest.v1.dto.request.filter.ItemFilterRequest;
-import com.emazon.cart.adapters.driving.rest.v1.dto.response.CarResponse;
-import com.emazon.cart.adapters.driving.rest.v1.dto.response.FullItemResponse;
-import com.emazon.cart.adapters.driving.rest.v1.dto.response.ItemResponse;
-import com.emazon.cart.adapters.driving.rest.v1.dto.response.PageResponse;
+import com.emazon.cart.adapters.driving.rest.v1.dto.response.*;
 import com.emazon.cart.adapters.driving.rest.v1.mapper.request.ItemFilterRequestMapper;
 import com.emazon.cart.adapters.driving.rest.v1.mapper.request.ItemRequestMapper;
 import com.emazon.cart.adapters.driving.rest.v1.mapper.request.PageQueryMapper;
@@ -15,6 +12,7 @@ import com.emazon.cart.adapters.driving.rest.v1.service.impl.CartServiceImpl;
 import com.emazon.cart.domain.api.CartServicePort;
 import com.emazon.cart.domain.model.Cart;
 import com.emazon.cart.domain.model.Item;
+import com.emazon.cart.domain.utils.DomainConstants;
 import com.emazon.cart.domain.utils.filter.ItemFilter;
 import com.emazon.cart.domain.utils.pagination.CartPage;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,8 +28,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class CartServiceImplTest {
 
@@ -137,5 +134,18 @@ class CartServiceImplTest {
         assertNotNull(response);
         assertEquals(pageResponse, response);
 
+    }
+
+    @Test
+    void testPurchase() {
+        // Arrange
+        doNothing().when(cartServicePort).purchase();
+
+        // Act
+        PurchaseProcessResponse response = carServiceImpl.purchase();
+
+        // Assert
+        assertEquals(DomainConstants.SUCCESS_SALE_MESSAGE, response.getMessage());
+        verify(cartServicePort, times(1)).purchase();
     }
 }

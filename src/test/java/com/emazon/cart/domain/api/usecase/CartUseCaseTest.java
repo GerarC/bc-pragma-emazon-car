@@ -1,8 +1,10 @@
 package com.emazon.cart.domain.api.usecase;
 
+import com.emazon.cart.domain.exceptions.NotEnoughProductStockException;
 import com.emazon.cart.domain.model.Cart;
 import com.emazon.cart.domain.model.Item;
 import com.emazon.cart.domain.model.Product;
+import com.emazon.cart.domain.model.SaleReport;
 import com.emazon.cart.domain.spi.*;
 import com.emazon.cart.domain.utils.filter.ItemFilter;
 import com.emazon.cart.domain.utils.pagination.CartPage;
@@ -28,17 +30,28 @@ class CartUseCaseTest {
     private static final Logger log = LoggerFactory.getLogger(CartUseCaseTest.class);
     @Mock
     private CartPersistencePort cartPersistencePort;
+
     @Mock
     private UserPersistencePort userPersistencePort;
+
     @Mock
     private ProductPersistencePort productPersistencePort;
+
     @Mock
     private ItemPersistencePort itemPersistencePort;
+
     @Mock
     private SupplyPersistencePort supplyPersistencePort;
 
+    @Mock
+    private SalePersistencePort salePersistencePort;
+
+    @Mock
+    private SaleReportPersistencePort saleReportPersistencePort;
+
     @InjectMocks
-    private CartUseCase carUserCase;
+    private CartUseCase cartUseCase;
+
 
     @BeforeEach
     void setUp() {
@@ -83,7 +96,7 @@ class CartUseCaseTest {
         when(itemPersistencePort.save(item)).thenReturn(item);
         when(cartPersistencePort.updateCar(any())).thenReturn(cart);
 
-        Cart returnedCart = carUserCase.addItem(item);
+        Cart returnedCart = cartUseCase.addItem(item);
         assertNotNull(returnedCart);
         assertEquals(returnedCart.getId(), carId);
         assertEquals(returnedCart.getUserId(), userId);
@@ -112,7 +125,7 @@ class CartUseCaseTest {
         when(itemPersistencePort.findByProductIdAndCarId(1L, carId)).thenReturn(item);
         doNothing().when(itemPersistencePort).deleteById(any());
         when(cartPersistencePort.updateCar(any())).thenReturn(cart);
-        Cart returnedCart = carUserCase.removeItem(productId);
+        Cart returnedCart = cartUseCase.removeItem(productId);
         verify(itemPersistencePort).deleteById(any());
         verify(cartPersistencePort).updateCar(any());
         assertNotNull(returnedCart);
@@ -154,7 +167,7 @@ class CartUseCaseTest {
         when(productPersistencePort.getAllProducts(filter, null)).thenReturn(mockPage);
         when(productPersistencePort.getProductsById(any())).thenReturn(products);
 
-        CartPage<Item> returnedPage = carUserCase.getItems(filter, null);
+        CartPage<Item> returnedPage = cartUseCase.getItems(filter, null);
         log.trace(returnedPage.toString());
         assertNotNull(returnedPage);
         assertEquals(returnedPage.getContent().size(), products.size());
@@ -197,9 +210,63 @@ class CartUseCaseTest {
         when(productPersistencePort.getProductsById(any())).thenReturn(products);
         when(supplyPersistencePort.nextSupplyDate(any())).thenReturn(LocalDateTime.now().plusDays(random.nextInt(10)));
 
-        CartPage<Item> returnedPage = carUserCase.getItems(filter, null);
+        CartPage<Item> returnedPage = cartUseCase.getItems(filter, null);
         assertNotNull(returnedPage);
         assertEquals(returnedPage.getContent().size(), products.size());
         returnedPage.getContent().forEach(item -> assertFalse(item.getHasStock()));
+    }
+
+    @Test
+    void testPurchase_Success() {
+        String userId = "user123";
+        Cart cart = new Cart("cart1", userId, LocalDateTime.now(), LocalDateTime.now(), new ArrayList<>());
+        List<Item> items = List.of(
+                new Item(1L, 1001L, "Product A", new BigDecimal("20.00"), 2, cart, List.of("Category1"), "BrandA", true, 100L, null),
+                new Item(2L, 1002L, "Product B", new BigDecimal("30.00"), 1, cart, List.of("Category2"), "BrandB", true, 50L, null)
+        );
+        cart.setItems(items);
+
+        List<Product> products = List.of(
+                new Product(1001L, "Product A", "Desc A", "BrandA", new BigDecimal("20.00"), 100L, List.of("Category1")),
+                new Product(1002L, "Product B", "Desc B", "BrandB", new BigDecimal("30.00"), 50L, List.of("Category2"))
+        );
+
+        when(userPersistencePort.getIdFromCurrentUser()).thenReturn(userId);
+        when(cartPersistencePort.getCarByUserId(userId)).thenReturn(cart);
+        when(productPersistencePort.getProductsById(any())).thenReturn(products);
+        when(salePersistencePort.performSale(any())).thenReturn(true);
+
+        cartUseCase.purchase();
+
+        verify(salePersistencePort, times(1)).performSale(items);
+        items.forEach(item -> verify(itemPersistencePort, times(1)).deleteById(item.getId()));
+        verify(saleReportPersistencePort, times(1)).saveReport(any(SaleReport.class));
+        verify(cartPersistencePort, times(1)).updateCar(cart);
+    }
+
+    @Test
+    void testPurchase_StockInsufficient_ThrowsException() {
+        String userId = "user123";
+        Cart cart = new Cart("cart1", userId, LocalDateTime.now(), LocalDateTime.now(), new ArrayList<>());
+        List<Item> items = List.of(
+                new Item(1L, 1001L, "Product A", new BigDecimal("20.00"), 2, cart, List.of("Category1"), "BrandA", true, 100L, null),
+                new Item(2L, 1002L, "Product B", new BigDecimal("30.00"), 1, cart, List.of("Category2"), "BrandB", true, 50L, null)
+        );
+        cart.setItems(items);
+
+        List<Product> products = List.of(
+                new Product(1001L, "Product A", "Desc A", "BrandA", new BigDecimal("20.00"), 1L, List.of("Category1")),  // Insufficient stock
+                new Product(1002L, "Product B", "Desc B", "BrandB", new BigDecimal("30.00"), 50L, List.of("Category2"))
+        );
+
+        when(userPersistencePort.getIdFromCurrentUser()).thenReturn(userId);
+        when(cartPersistencePort.getCarByUserId(userId)).thenReturn(cart);
+        when(productPersistencePort.getProductsById(any())).thenReturn(products);
+
+        assertThrows(NotEnoughProductStockException.class, () -> cartUseCase.purchase());
+
+        verify(salePersistencePort, times(0)).performSale(any());
+        verify(itemPersistencePort, times(0)).deleteById(any());
+        verify(saleReportPersistencePort, times(0)).saveReport(any(SaleReport.class));
     }
 }

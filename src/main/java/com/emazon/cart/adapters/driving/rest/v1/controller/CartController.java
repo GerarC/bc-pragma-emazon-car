@@ -97,7 +97,19 @@ public class CartController {
         return ResponseEntity.ok(cartService.getItems(filter, query));
     }
 
+    @Operation(summary = RestConstants.SWAGGER_PURCHASE_SUMMARY)
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = RestConstants.CODE_OK,
+                    description = RestConstants.SWAGGER_PURCHASE_SUCCESSFUL,
+                    useReturnTypeSchema = true),
+            @ApiResponse(
+                    responseCode = RestConstants.CODE_BAD_REQUEST,
+                    description = RestConstants.SWAGGER_VALIDATIONS_DONT_PASS,
+                    content = @Content(schema = @Schema(implementation = ValidationExceptionResponse.class))),
+    })
     @PostMapping("/purchase")
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     public ResponseEntity<PurchaseProcessResponse> purchase(){
         return ResponseEntity.ok(cartService.purchase());
     }
